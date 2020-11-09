@@ -1,0 +1,64 @@
+---
+title: "uloha2"
+output: html_document
+---
+```{r}
+library(dplyr)
+lim <- aov(LogRat ~ Group, data = sod3.data)
+summary(lim)
+```
+```{r}
+library(gplots)
+par(las=2)
+par(mar=c(5,10,4,2))
+plot(TukeyHSD(lim))
+```
+
+```{r}
+library(tidyverse)
+library(ggpubr)
+data1 <- read_delim("https://raw.githubusercontent.com/PKvasnick/RTutorial/master/data/sod3_full.dat",
+    "\t", escape_double = FALSE, trim_ws = TRUE)
+data1
+graf.data <- read_delim("https://raw.githubusercontent.com/PKvasnick/RTutorial/master/data/gapdh_full.dat",
+    "\t", escape_double = FALSE, trim_ws = TRUE)
+graf.data
+data1$Cref <- graf.data$C
+data1$LogRat <- log10(data1$C / data1$Cref)
+data1
+ p <- ggboxplot(data1, x = "Group", 
+                       y = "LogRat",
+                      color = "Group", 
+                     palette =c("goldenrod1", "darkgrey", "plum4"),
+                      add = "jitter", shape = "Group")
+ p
+ my_comparisons <- list( c("KONTROLA", "7-NI"), c("7-NI", "L-NAME"), c("KONTROLA", "L-NAME") )
+p + stat_compare_means(comparisons = my_comparisons)+ # Add pairwise comparisons p-value
+  stat_compare_means(label.y = 0.75)
+```
+
+# využili sme v tomto prípade one-way ANOVU; Kruskal-Wallis
+
+```{r}
+library(multcomp)
+data1<-cholesterol
+data1
+attach(cholesterol)
+aggregate(response,by=list(trt),FUN=mean)
+
+aggregate(response,by=list(trt),FUN=sd)
+
+fit <- aov(response~trt)
+
+detach(cholesterol)
+
+par(mar=c(2,4,6,2))
+tuk <- glht(fit,linfct=mcp(trt="Tukey"))
+labels1 <- cld(tuk, level=.05)$mcletters$Letters
+labels2 <- paste(names(labels1), "\n", labels1)
+par(las=2)
+par(mar=c(5,8,4,2))
+plot(TukeyHSD(fit))
+
+```
+
