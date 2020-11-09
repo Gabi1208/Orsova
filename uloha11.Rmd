@@ -1,0 +1,35 @@
+---
+title: "bl"
+output: html_document
+---
+
+```{r}
+library(dplyr)
+
+uloha <- read_delim("https://raw.githubusercontent.com/PKvasnick/RTutorial/master/data/Neuro.csv", 
+                        ",", escape_double = TRUE, col_names = TRUE) 
+                       
+
+uloha
+res<-lm(Salary~Neuroticism, data=uloha)
+summary(res)
+uloha$Education = as.factor(uloha$Education)
+vysl<-aov(Salary~Education-1, data=uloha)
+summary(vysl)
+
+library(ggpubr)
+
+ggboxplot(uloha, x = "Education", 
+                 y = "Neuroticism",
+               color = "Education",
+add = "jitter", legend = "none") +
+rotate_x_text(angle = 45)+
+geom_hline(yintercept = mean(uloha$response), linetype = 2)+
+stat_compare_means(method = "anova", label.y = 0.1)+
+stat_compare_means(label = "p.signif", method = "t.test",
+ref.group = ".all.")
+
+
+plot(uloha$Education, uloha$Salary)
+```
+
